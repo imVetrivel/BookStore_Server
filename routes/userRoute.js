@@ -50,13 +50,11 @@ router.post('/signin', async (req, res) => {
             return res.status(400).json({ message: "No Email Exists Please Signup or check email" });
         }
 
-        // Compare provided password with stored hashed password
         const isPasswordValid = await bcrypt.compare(password, finduser.password);
         if (!isPasswordValid) {
             return res.status(400).json({ message: "Invalid password" });
         }
 
-        // If the email and password are valid, return a success message
         res.status(200).json({ message: "Login successful", user: finduser });
 
     } catch (error) {
