@@ -66,10 +66,10 @@ router.post('/signin', async (req, res) => {
 
 router.put('/addcart', async (req, res) => {
     try {
-        const { userId, bookId } = req.body;
+        const { userId, book } = req.body;
         const updatedUser = await users.findOneAndUpdate(
             { _id: userId },
-            { $addToSet: { cart_items: bookId } },
+            { $addToSet: { cart_items: book } },
             { new: true } 
         );
         if (!updatedUser) {
@@ -86,11 +86,13 @@ router.put('/addcart', async (req, res) => {
 router.get('/getcart/:userid',async(req,res) => {
     try {
         const {userid} = req.params;
-        const user = await users.findById(userid).select('cart_items');
+        const user = await users.findById(userid);
+        // const user = await users.findById(userid).select('cart_items');
         if(!user){
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json({cart_items:user.cart_items});
+        // res.status(200).json({cart_items:user.cart_items});
+        res.status(200).json({cart:user})
     } catch (error) {
         console.error('Error fetching cart:', error);
         res.status(500).json({ message: 'Internal server error', error });
