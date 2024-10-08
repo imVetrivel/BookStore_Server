@@ -35,7 +35,7 @@ router.post('/register', async (req,res) => {
 
 router.post('/signin', async (req, res) => {
     try {
-        console.log('Request body:', req.body); // Log the incoming request body
+        // console.log('Request body:', req.body); // Log the incoming request body
         const { email, password } = req.body;
 
         // Check if email and password are provided
