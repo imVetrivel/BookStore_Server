@@ -10,10 +10,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-	password: {
-		type: String,
-		required: true
-	}
+    password: {
+        type: String,
+        required: true
+    },
+    cart_items: {
+        type: Array,
+        required: false
+    }
 })
 
 const User = mongoose.model("User", userSchema)
