@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router();
 const users = require('../models/userModel')
 const bcrypt = require('bcrypt');
+const books = require('../models/BookModel')
 
 router.post('/register', async (req,res) => {
 	try {
@@ -16,14 +17,12 @@ router.post('/register', async (req,res) => {
 		
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create a new user with the hashed password
         const newUserData = new users({
             name,
             email,
             password: hashedPassword
         });
 
-        // Save the user to the database
         const savedUser = await newUserData.save();
 		res.status(200).json(savedUser)
 
@@ -35,17 +34,14 @@ router.post('/register', async (req,res) => {
 
 router.post('/signin', async (req, res) => {
     try {
-        // console.log('Request body:', req.body); // Log the incoming request body
         const { email, password } = req.body;
 
-        // Check if email and password are provided
         if (!email || !password) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
         const finduser = await users.findOne({ email: email });
 
-        // Check if user exists
         if (!finduser) {
             return res.status(400).json({ message: "No Email Exists Please Signup or check email" });
         }
@@ -65,19 +61,34 @@ router.post('/signin', async (req, res) => {
 
 
 router.put('/addcart', async (req, res) => {
+    const { userId, bookId } = req.body;
+
     try {
-        const { userId, book } = req.body;
-        const updatedUser = await users.findOneAndUpdate(
-            { _id: userId },
-            { $addToSet: { cart_items: book } },
-            { new: true } 
-        );
-        if (!updatedUser) {
+        const user = await users.findById(userId);
+        if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.json(updatedUser);
+
+        const book = await books.findById(bookId);
+        if (!book) {
+            return res.status(404).json({ message: 'Book not found' });
+        }
+
+        const isAlreadyInCart = user.cart_items.some(
+            (item) => item._id === bookId
+        );
+
+        if (isAlreadyInCart) {
+            return res.status(400).json({ message: 'Book already in cart' });
+        }
+
+        user.cart_items.push(book);
+        await user.save();
+
+        return res.status(200).json({ message: 'Book added to cart', user });
     } catch (error) {
-        res.status(500).json({ message: 'Error adding to cart', error });
+        console.error('Error adding to cart:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 });
 
@@ -87,11 +98,9 @@ router.get('/getcart/:userid',async(req,res) => {
     try {
         const {userid} = req.params;
         const user = await users.findById(userid);
-        // const user = await users.findById(userid).select('cart_items');
         if(!user){
             return res.status(404).json({ message: 'User not found' });
         }
-        // res.status(200).json({cart_items:user.cart_items});
         res.status(200).json({cart:user})
     } catch (error) {
         console.error('Error fetching cart:', error);

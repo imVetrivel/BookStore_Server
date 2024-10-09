@@ -18,7 +18,7 @@ router.get('/',async(req,res) => {
 
 router.post('/add',async(req,res) => {
     try {
-        const {title,author,description,price,imageUrl,overview,language,genre,publisher} = req.body 
+        const {title,author,description,price,imageUrl,overview,language,genre,publisher,_id} = req.body 
         if(!title || !author || !description  || !price || !imageUrl || !overview || !language || !genre || !publisher){
             return res.status(400).json({message:"title & desc Required"})
         }
