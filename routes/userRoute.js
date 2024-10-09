@@ -92,6 +92,27 @@ router.put('/addcart', async (req, res) => {
     }
 });
 
+router.delete('/deletecart', async (req, res) => {
+    const { userId, index } = req.body; 
+
+    try {
+        const user = await users.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (index < 0 || index >= user.cart_items.length) {
+            return res.status(400).json({ message: 'Invalid index' });
+        }
+        
+        user.cart_items.splice(index, 1);
+        await user.save(); 
+        
+        res.status(200).json({ message: 'Cart item deleted successfully', cart_items: user.cart_items });
+    } catch (error) {
+        console.error(error); 
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 
 router.get('/getcart/:userid',async(req,res) => {
