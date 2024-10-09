@@ -4,17 +4,17 @@ const users = require('../models/userModel')
 const bcrypt = require('bcrypt');
 const books = require('../models/BookModel')
 
-router.post('/register', async (req,res) => {
-	try {
-		const {name,email,password} = req.body
-		const finduser = await users.findOne({email:email})
-		if(finduser!==null){
-			return res.status(400).json({message:"Email Already exists"})
-		}
-		if(!name || !email || !password){
-			return res.status(400).json({message:"All fields are required"})
-		}
-		
+router.post('/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body
+        const finduser = await users.findOne({ email: email })
+        if (finduser !== null) {
+            return res.status(400).json({ message: "Email Already exists" })
+        }
+        if (!name || !email || !password) {
+            return res.status(400).json({ message: "All fields are required" })
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUserData = new users({
@@ -24,12 +24,12 @@ router.post('/register', async (req,res) => {
         });
 
         const savedUser = await newUserData.save();
-		res.status(200).json(savedUser)
+        res.status(200).json(savedUser)
 
-	} catch (error) {
-		console.log(error)
-		res.status(500).json({message:"Internal server error"})
-	}
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: "Internal server error" })
+    }
 })
 
 router.post('/signin', async (req, res) => {
@@ -68,23 +68,18 @@ router.put('/addcart', async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
         const book = await books.findById(bookId);
         if (!book) {
             return res.status(404).json({ message: 'Book not found' });
         }
-
         const isAlreadyInCart = user.cart_items.some(
-            (item) => item._id === bookId
+            (item) => item._id.toString() === bookId.toString()
         );
-
         if (isAlreadyInCart) {
             return res.status(400).json({ message: 'Book already in cart' });
         }
-
         user.cart_items.push(book);
         await user.save();
-
         return res.status(200).json({ message: 'Book added to cart', user });
     } catch (error) {
         console.error('Error adding to cart:', error);
@@ -94,14 +89,14 @@ router.put('/addcart', async (req, res) => {
 
 
 
-router.get('/getcart/:userid',async(req,res) => {
+router.get('/getcart/:userid', async (req, res) => {
     try {
-        const {userid} = req.params;
+        const { userid } = req.params;
         const user = await users.findById(userid);
-        if(!user){
+        if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-        res.status(200).json({cart:user})
+        res.status(200).json({ cart: user })
     } catch (error) {
         console.error('Error fetching cart:', error);
         res.status(500).json({ message: 'Internal server error', error });
@@ -109,11 +104,17 @@ router.get('/getcart/:userid',async(req,res) => {
 })
 
 
-
-
-
-
-
-
+router.put('/address/:userid', async (req,res) =>{
+    try {
+        const{userid} = req.params;
+        const address = req.body;
+        const user = await users.findById(userid);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        
+    }
+})
 
 module.exports = router
